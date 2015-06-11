@@ -72,6 +72,7 @@ var loginTimeout = 10 * 1000;
  */
 var twostep      = 0;
 var page         = require('webpage').create();
+var imgname = folder + 'ice-' + getDateTime(1) + '.png'
 page.onConsoleMessage = function () {};
 page.onError  = function () {};
 
@@ -94,7 +95,7 @@ if (!iitc) {
  * @param {String} str - what to announce
  */
 function announce(str) {
-    console.log(getDateTime(0) + ': ' + str);
+    //console.log(getDateTime(0) + ': ' + str);
 }
 
 /**
@@ -217,7 +218,7 @@ function setMinMax(min, max, iitcz) {
  */
 function s() {
     announce('Screen saved');
-    page.render(folder + 'ice-' + getDateTime(1) + '.png');
+    page.render(imgname);
 }
 
 /**
@@ -260,7 +261,7 @@ function checkSettings(l, p, minlevel, maxlevel, area) {
  * Greeter. Beautiful ASCII-Art logo.
  */
 function greet() {
-    console.log('\n     _____ )   ___      _____) \n    (, /  (__/_____)  /        \n      /     /         )__      \n  ___/__   /        /          \n(__ /     (______) (_____)  v' + version + '\n\nIf something doesn\'t work or if you want to submit a feature request, visit https://github.com/nibogd/ingress-ice/issues');
+    //console.log('\n     _____ )   ___      _____) \n    (, /  (__/_____)  /        \n      /     /         )__      \n  ___/__   /        /          \n(__ /     (______) (_____)  v' + version + '\n\nIf something doesn\'t work or if you want to submit a feature request, visit https://github.com/nibogd/ingress-ice/issues');
 }
 
 /**
@@ -525,6 +526,7 @@ function main() {
     window.setTimeout(function () {
         timestampz(timestamp, getDateTime(), iitc);
         s();
+        console.log(imgname);
     }, 2000);
 }
 //MAIN SCRIPT
