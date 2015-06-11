@@ -72,7 +72,7 @@ var loginTimeout = 10 * 1000;
  */
 var twostep      = 0;
 var page         = require('webpage').create();
-var imgname = folder + 'ice-' + getDateTime(1) + '.png'
+var imgname = folder + 'ice-' + getDateTime(1) + '.png';
 page.onConsoleMessage = function () {};
 page.onError  = function () {};
 
@@ -219,6 +219,10 @@ function setMinMax(min, max, iitcz) {
 function s() {
     announce('Screen saved');
     page.render(imgname);
+    if ((curnum>=ssnum)&&(ssnum!=0)) {
+        announce('Finished sucessfully. Exiting...\nThanks for using ingress-ice!');
+        phantom.exit();
+    }
 }
 
 /**
@@ -325,10 +329,7 @@ function checkLogin() {
  * @param {number} ssnum
  */
 function count() {
-    if ((curnum>=ssnum)&&(ssnum!=0)) {
-        announce('Finished sucessfully. Exiting...\nThanks for using ingress-ice!');
-        phantom.exit();
-    } else if (ssnum!=0) {
+    if (ssnum!=0) {
         announce('Screen #' + (curnum + 1) + '/' + ssnum + ' captured');
         curnum++;
     }
