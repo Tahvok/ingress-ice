@@ -219,6 +219,7 @@ function setMinMax(min, max, iitcz) {
 function s() {
     announce('Screen saved');
     page.render(imgname);
+    console.log(imgname);
     if ((curnum>=ssnum)&&(ssnum!=0)) {
         announce('Finished sucessfully. Exiting...\nThanks for using ingress-ice!');
         phantom.exit();
@@ -527,7 +528,6 @@ function main() {
     window.setTimeout(function () {
         timestampz(timestamp, getDateTime(), iitc);
         s();
-        console.log(imgname);
     }, 2000);
 }
 //MAIN SCRIPT
