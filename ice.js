@@ -28,7 +28,21 @@ if (!args[11]) {
 if (isNaN(args[1])) {
     var l            = args[1];
     var p            = args[2];
-    var area         = args[3];
+    var minlevel     = parseInt(args[3], 10);
+    var maxlevel     = parseInt(args[4], 10);
+    var v            = 1000 * parseInt(args[5], 10);
+    var width        = parseInt(args[6], 10);
+    var height       = parseInt(args[7], 10);
+    var folder       = args[8];
+    var ssnum        = args[9];
+    var loglevel     = args[10];
+    var area         = args[11];
+    iitc             = 0;
+    timestamp        = 0;
+} else if (parseInt(args[1], 10)>=1) {
+    var configver    = parseInt(args[1], 10);
+    var l            = args[2];
+    var p            = args[3];
     var minlevel     = parseInt(args[4], 10);
     var maxlevel     = parseInt(args[5], 10);
     var v            = 1000 * parseInt(args[6], 10);
@@ -36,23 +50,9 @@ if (isNaN(args[1])) {
     var height       = parseInt(args[8], 10);
     var folder       = args[9];
     var ssnum        = args[10];
-    var loglevel     = args[11];
-    iitc             = 0;
-    timestamp        = 0;
-} else if (parseInt(args[1], 10)>=1) {
-    var configver    = parseInt(args[1], 10);
-    var l            = args[2];
-    var p            = args[3];
-    var area         = args[4];
-    var minlevel     = parseInt(args[5], 10);
-    var maxlevel     = parseInt(args[6], 10);
-    var v            = 1000 * parseInt(args[7], 10);
-    var width        = parseInt(args[8], 10);
-    var height       = parseInt(args[9], 10);
-    var folder       = args[10];
-    var ssnum        = args[11];
-    var iitc         = parseInt(args[12], 10);
-    var timestamp    = parseInt(args[13], 10);
+    var iitc         = parseInt(args[11], 10);
+    var timestamp    = parseInt(args[12], 10);
+    var area         = args[13];
 }
 
 /**
