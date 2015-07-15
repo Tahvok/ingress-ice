@@ -1,7 +1,7 @@
 /**
  * @file Ingress-ICE, the main script
  * @author Nikitakun (https://github.com/nibogd)
- * @version 2.3.0
+ * @version 3.0.0
  * @license MIT
  * @see {@link https://github.com/nibogd/ingress-ice|GitHub }
  * @see {@link https://ingress.divshot.io/|Website }
@@ -55,11 +55,14 @@ if (isNaN(args[1])) {
     var area         = args[13];
 }
 
+/*global phantom */
+/*global idleReset */
+
 /**
  * Counter for number of screenshots
  */
 var curnum       = 0;
-var version      = '2.3.0';
+var version      = '3.0.0';
 
 /**
  * Delay between logging in and checking if successful
@@ -111,25 +114,26 @@ function getDateTime(format) {
     var hour    = now.getHours();
     var minute  = now.getMinutes();
     var second  = now.getSeconds();
-    if(month.toString().length == 1) {
-        var month = '0' + month;
+    if(month.toString().length === 1) {
+        month = '0' + month;
     }
-    if(day.toString().length == 1) {
-        var day = '0' + day;
+    if(day.toString().length === 1) {
+        day = '0' + day;
     }
-    if(hour.toString().length == 1) {
-        var hour = '0' + hour;
+    if(hour.toString().length === 1) {
+        hour = '0' + hour;
     }
-    if(minute.toString().length == 1) {
-        var minute = '0' + minute;
+    if(minute.toString().length === 1) {
+        minute = '0' + minute;
     }
-    if(second.toString().length == 1) {
-        var second = '0' + second;
+    if(second.toString().length === 1) {
+        second = '0' + second;
     }
-    if (format==1) {
-        var dateTime = year + '-' + month + '-' + day + '--' + hour + '-' + minute + '-' + second;
+    var dateTime;
+    if (format === 1) {
+        dateTime = year + '-' + month + '-' + day + '--' + hour + '-' + minute + '-' + second;
     } else {
-        var dateTime = day + '.' + month + '.' + year + ' '+hour+':'+minute+':'+second;
+        dateTime = day + '.' + month + '.' + year + ' '+hour+':'+minute+':'+second;
     }
     return dateTime;
 }
@@ -159,13 +163,13 @@ function setMinMax(min, max, iitcz) {
                     return document.querySelector('#level_low' + min).getBoundingClientRect();
                 }, min);
                 page.sendEvent('click', rect1.left + rect1.width / 2, rect1.top + rect1.height / 2);
-                if (max == 8) {
+                if (max === 8) {
                     page.evaluate(function () {
                         document.querySelector('#filters_container').style.display = 'none';
                     });
                 }
             }, 2000);
-        };
+        }
         if (max < 8) {
             window.setTimeout(function() {
                 var rect2 = page.evaluate(function() {
@@ -180,8 +184,8 @@ function setMinMax(min, max, iitcz) {
                     page.evaluate(function () {
                         document.querySelector('#filters_container').style.display = 'none';
                     });
-                }, 2000)
-            }, 4000)
+                }, 2000);
+            }, 4000);
         }
     } else {
         window.setTimeout(function () {
@@ -189,22 +193,34 @@ function setMinMax(min, max, iitcz) {
                 if (min > 1) {
                     switch (min) {
                         case 8: document.getElementsByClassName("leaflet-control-layers-selector")[15].checked = false;
+                        /* falls through */
                         case 7: document.getElementsByClassName("leaflet-control-layers-selector")[14].checked = false;
+                        /* falls through */
                         case 6: document.getElementsByClassName("leaflet-control-layers-selector")[13].checked = false;
+                        /* falls through */
                         case 5: document.getElementsByClassName("leaflet-control-layers-selector")[12].checked = false;
+                        /* falls through */
                         case 4: document.getElementsByClassName("leaflet-control-layers-selector")[11].checked = false;
+                        /* falls through */
                         case 3: document.getElementsByClassName("leaflet-control-layers-selector")[10].checked = false;
+                        /* falls through */
                         case 2: document.getElementsByClassName("leaflet-control-layers-selector")[9].checked = false;
                     }
                 }
                 if (max < 8) {
                     switch (max) {
                         case 1: document.getElementsByClassName("leaflet-control-layers-selector")[10].checked = false;
+                        /* falls through */
                         case 2: document.getElementsByClassName("leaflet-control-layers-selector")[11].checked = false;
+                        /* falls through */
                         case 3: document.getElementsByClassName("leaflet-control-layers-selector")[12].checked = false;
+                        /* falls through */
                         case 4: document.getElementsByClassName("leaflet-control-layers-selector")[13].checked = false;
+                        /* falls through */
                         case 5: document.getElementsByClassName("leaflet-control-layers-selector")[14].checked = false;
+                        /* falls through */
                         case 6: document.getElementsByClassName("leaflet-control-layers-selector")[15].checked = false;
+                        /* falls through */
                         case 7: document.getElementsByClassName("leaflet-control-layers-selector")[16].checked = false;
                     }
                 }
@@ -240,37 +256,29 @@ function quit(err) {
 }
 
 /**
- * Check if all mandatory settings are correct and quit if not
- * @param {String} l - google login
- * @param {String} p - google password
+ * Check if portal level settings are correct and quit if not
  * @param {number} minlevel - minimal portal level
  * @param {number} maxlevel - maximal portal level
- * @param {String} area - Link to a place at the ingress map
  */
-function checkSettings(l, p, minlevel, maxlevel, area) {
-    if (!l | !p) {
-        quit('you haven\'t entered your login and/or password');
-    };
-    if ((minlevel < 0 | minlevel > 8) | (maxlevel < 0 | maxlevel > 8) | (!minlevel | !maxlevel)) {
-        quit('the lowest and/or highest portal levels were not set or were set wrong');
-    };
+function checkSettings(minlevel, maxlevel) {
+    if ((minlevel < 0 || minlevel > 8) || (maxlevel < 0 || maxlevel > 8) || (!minlevel || !maxlevel)) {
+        quit('the lowest and/or highest portal levels were set wrong. There are no 9 level portals.');
+    }
     if (minlevel>maxlevel) {
         quit('lowest portal level is higher than highest. Isn\'t that impossible?!');
-    };
-    if (!area | area == 0) {
-        quit('you forgot to set the location link, didn\'t you?');
-    };
+    }
 }
 
 /**
  * Greeter. Beautiful ASCII-Art logo.
  */
 function greet() {
-    //console.log('\n     _____ )   ___      _____) \n    (, /  (__/_____)  /        \n      /     /         )__      \n  ___/__   /        /          \n(__ /     (______) (_____)  v' + version + '\n\nIf something doesn\'t work or if you want to submit a feature request, visit https://github.com/nibogd/ingress-ice/issues');
+    //console.log('\n     _____ )   ___      _____) \n    (, /  (__/_____)  /        \n      /     /         )__      \n  ___/__   /        /          \n(__ /     (______) (_____)  v' + version + '\n\nIf you need help or want a new feature, visit https://github.com/nibogd/ingress-ice/issues');
 }
 
 /**
  * Log in to google. Doesn't use post, because URI may change.
+ * Fixed in 3.0.0 -- obsolete versions will not work (google changed login form)
  * @param l - google login
  * @param p - google password
  */
@@ -278,18 +286,20 @@ function login(l, p) {
     page.evaluate(function (l) {
         document.getElementById('Email').value = l;
     }, l);
-
-    page.evaluate(function (p) {
-        document.getElementById('Passwd').value = p;
-    }, p);
-
     page.evaluate(function () {
-        document.querySelector("input#signIn").click();
+        document.querySelector("#next").click();
     });
-
-    page.evaluate(function () {
-        document.getElementById('gaia_loginform').submit();
-    });
+    window.setInterval(function () {
+        page.evaluate(function (p) {
+            document.getElementById('Passwd').value = p;
+        }, p);
+        page.evaluate(function () {
+            document.querySelector("#next").click();
+        });
+        page.evaluate(function () {
+            document.getElementById('gaia_loginform').submit();
+        });
+    }, loginTimeout / 10);
 }
 
 /**
@@ -299,9 +309,9 @@ function checkLogin() {
 
     //announce('URI is now ' + page.url.substring(0,40) + '...');
 
-    if (page.url.substring(0,40) == 'https://accounts.google.com/ServiceLogin') {quit('login failed: wrong email and/or password')};
+    if (page.url.substring(0,40) === 'https://accounts.google.com/ServiceLogin') {quit('login failed: wrong email and/or password');}
 
-        if (page.url.substring(0,40) == 'https://appengine.google.com/_ah/loginfo') {
+        if (page.url.substring(0,40) === 'https://appengine.google.com/_ah/loginfo') {
             announce('Accepting appEngine request...');
             page.evaluate(function () {
                 document.getElementById('persist_checkbox').checked = true;
@@ -309,7 +319,7 @@ function checkLogin() {
             });
         }
 
-        if (page.url.substring(0,40) == 'https://accounts.google.com/SecondFactor') {
+        if (page.url.substring(0,40) === 'https://accounts.google.com/SecondFactor') {
             announce('Using two-step verification, please enter your code:');
             twostep = system.stdin.readLine();
         }
@@ -330,7 +340,7 @@ function checkLogin() {
  * @param {number} ssnum
  */
 function count() {
-    if (ssnum!=0) {
+    if (ssnum!==0) {
         announce('Screen #' + (curnum + 1) + '/' + ssnum + ' captured');
         curnum++;
     }
@@ -343,30 +353,30 @@ function count() {
 function hideDebris(iitcz) {
     if (!iitcz) {
         page.evaluate(function () {
-            if (document.querySelector('#comm'))           {document.querySelector('#comm').style.display = 'none'}
-            if (document.querySelector('#player_stats'))   {document.querySelector('#player_stats').style.display = 'none'}
-            if (document.querySelector('#game_stats'))     {document.querySelector('#game_stats').style.display = 'none'}
-            if (document.querySelector('#geotools'))       {document.querySelector('#geotools').style.display = 'none'}
-            if (document.querySelector('#header'))         {document.querySelector('#header').style.display = 'none'}
-            if (document.querySelector('#snapcontrol'))    {document.querySelector('#snapcontrol').style.display = 'none'}
-            if (document.querySelectorAll('.img_snap')[0]) {document.querySelectorAll('.img_snap')[0].style.display = 'none'}
+            if (document.querySelector('#comm'))           {document.querySelector('#comm').style.display = 'none';}
+            if (document.querySelector('#player_stats'))   {document.querySelector('#player_stats').style.display = 'none';}
+            if (document.querySelector('#game_stats'))     {document.querySelector('#game_stats').style.display = 'none';}
+            if (document.querySelector('#geotools'))       {document.querySelector('#geotools').style.display = 'none';}
+            if (document.querySelector('#header'))         {document.querySelector('#header').style.display = 'none';}
+            if (document.querySelector('#snapcontrol'))    {document.querySelector('#snapcontrol').style.display = 'none';}
+            if (document.querySelectorAll('.img_snap')[0]) {document.querySelectorAll('.img_snap')[0].style.display = 'none';}
         });
         page.evaluate(function () {
             var hide = document.querySelectorAll('.gmnoprint');
-            for (index = 0; index < hide.length; ++index) {
+            for (var index = 0; index < hide.length; ++index) {
                 hide[index].style.display = 'none';
             }
         });
     } else {
         window.setTimeout(function () {
             page.evaluate(function () {
-                if (document.querySelector('#chat'))                            {document.querySelector('#chat').style.display = 'none'}
-                if (document.querySelector('#chatcontrols'))                    {document.querySelector('#chatcontrols').style.display = 'none'}
-                if (document.querySelector('#chatinput'))                       {document.querySelector('#chatinput').style.display = 'none'}
-                if (document.querySelector('#updatestatus'))                    {document.querySelector('#updatestatus').style.display = 'none'}
-                if (document.querySelector('#sidebartoggle'))                   {document.querySelector('#sidebartoggle').style.display = 'none'}
-                if (document.querySelector('#scrollwrapper'))                   {document.querySelector('#scrollwrapper').style.display = 'none'}
-                if (document.querySelectorAll('.leaflet-control-container')[0]) {document.querySelectorAll('.leaflet-control-container')[0].style.display = 'none'}
+                if (document.querySelector('#chat'))                            {document.querySelector('#chat').style.display = 'none';}
+                if (document.querySelector('#chatcontrols'))                    {document.querySelector('#chatcontrols').style.display = 'none';}
+                if (document.querySelector('#chatinput'))                       {document.querySelector('#chatinput').style.display = 'none';}
+                if (document.querySelector('#updatestatus'))                    {document.querySelector('#updatestatus').style.display = 'none';}
+                if (document.querySelector('#sidebartoggle'))                   {document.querySelector('#sidebartoggle').style.display = 'none';}
+                if (document.querySelector('#scrollwrapper'))                   {document.querySelector('#scrollwrapper').style.display = 'none';}
+                if (document.querySelectorAll('.leaflet-control-container')[0]) {document.querySelectorAll('.leaflet-control-container')[0].style.display = 'none';}
             });
         }, 2000);
     }
@@ -375,45 +385,43 @@ function hideDebris(iitcz) {
 /**
  * Adds a timestamp to a screenshot
  * @since 2.3.0
- * @param {boolean} timestampz
  * @param {String} time
  * @param {boolean} iitcz
  */
-function timestampz(timestampz, time, iitcz) {
-    if (timestampz) {
-        if (!iitcz) {
-            page.evaluate(function (dateTime) {
-                var water = document.createElement('p');
-                water.id='watermark-ice';
-                water.innerHTML = dateTime;
-                water.style.position = 'absolute';
-                water.style.color = 'orange';
-                water.style.top = '0';
-                water.style.left = '0';
-                water.style.fontSize = '40px';
-                water.style.opacity = '0.8';
-                water.style.marginTop = '0';
-                water.style.paddingTop = '0';
-                water.style.fontFamily = 'monospace';
-                document.querySelector('#map_canvas').appendChild(water);
-            }, time);
-        } else {
-            page.evaluate(function (dateTime) {
-                var water = document.createElement('p');
-                water.id='watermark-ice';
-                water.innerHTML = dateTime;
-                water.style.position = 'absolute';
-                water.style.color = '#3A539B';
-                water.style.top = '0';
-                water.style.zIndex = '4404';
-                water.style.marginTop = '0';
-                water.style.paddingTop = '0';
-                water.style.left = '0';
-                water.style.fontSize = '40px';
-                water.style.opacity = '0.8';
-                document.querySelectorAll('body')[0].appendChild(water);
-            }, time);
-        }
+function addTimestamp(time, iitcz) {
+    if (!iitcz) {
+        page.evaluate(function (dateTime) {
+            var water = document.createElement('p');
+            water.id='watermark-ice';
+            water.innerHTML = dateTime;
+            water.style.position = 'absolute';
+            water.style.color = 'orange';
+            water.style.top = '0';
+            water.style.left = '0';
+            water.style.fontSize = '40px';
+            water.style.opacity = '0.8';
+            water.style.marginTop = '0';
+            water.style.paddingTop = '0';
+            water.style.fontFamily = 'monospace';
+            document.querySelector('#map_canvas').appendChild(water);
+        }, time);
+    } else {
+        page.evaluate(function (dateTime) {
+            var water = document.createElement('p');
+            water.id='watermark-ice';
+            water.innerHTML = dateTime;
+            water.style.position = 'absolute';
+            water.style.color = '#3A539B';
+            water.style.top = '0';
+            water.style.zIndex = '4404';
+            water.style.marginTop = '0';
+            water.style.paddingTop = '0';
+            water.style.left = '0';
+            water.style.fontSize = '40px';
+            water.style.opacity = '0.8';
+            water.style.fontFamily = 'monospace';
+            document.querySelectorAll('body')[0].appendChild(water);
+        }, time);
     }
 }
 
@@ -423,15 +431,13 @@ function timestampz(timestampz, time, iitcz) {
  * @author akileos (https://github.com/akileos)
  * @author Nikitakun
  */
-function iitcz(iitcz) {
-    if (iitcz) {
-        page.evaluate(function() {
-            var script = document.createElement('script');
-            script.type='text/javascript';
-            script.src='https://secure.jonatkins.com/iitc/release/total-conversion-build.user.js';
-            document.head.insertBefore(script, document.head.lastChild);
-        });
-    }
+function addIitc() {
+    page.evaluate(function() {
+        var script = document.createElement('script');
+        script.type='text/javascript';
+        script.src='https://secure.jonatkins.com/iitc/release/total-conversion-build.user.js';
+        document.head.insertBefore(script, document.head.lastChild);
+    });
 }
 
 /**
@@ -453,7 +459,7 @@ function prepare(iitcz, widthz, heightz) {
                 height: clipRect.height
             };
         }, selector);
-        var oldClipRect = page.clipRect;
+        //var oldClipRect = page.clipRect;
         page.clipRect = elementBounds;
     } else {
         window.setTimeout(function () {
@@ -479,7 +485,7 @@ function prepare(iitcz, widthz, heightz) {
                     height: clipRect.height
                 };
             }, selector);
-            var oldClipRect = page.clipRect;
+            //var oldClipRect = page.clipRect;
             page.clipRect = elementBounds;
         }, 4000);
     }
@@ -520,24 +526,27 @@ function main() {
     }
     if (!iitc) {
         humanPresence();
+        hideDebris(iitc);
     } else {
         page.evaluate(function () {
             idleReset();
         });
     }
     window.setTimeout(function () {
-        timestampz(timestamp, getDateTime(), iitc);
+        if (timestamp) {
+            addTimestamp(getDateTime(), iitc);
+        }
         s();
     }, 2000);
 }
 //MAIN SCRIPT
 
-checkSettings(l, p, minlevel, maxlevel, area);
+checkSettings(minlevel, maxlevel);
 greet();
 
 page.open('https://www.ingress.com/intel', function (status) {
 
-    if (status !== 'success') {quit('cannot connect to remote server')};
+    if (status !== 'success') {quit('cannot connect to remote server');}
 
         var link = page.evaluate(function () {
             return document.getElementsByTagName('a')[0].href;
@@ -548,14 +557,16 @@ page.open('https://www.ingress.com/intel', function (status) {
 
             login(l, p);
             window.setTimeout(function () {
-                checkLogin();
                 announce('Verifying login...');
+                checkLogin();
                 window.setTimeout(function () {
                     page.open(area, function () {
-                        iitcz(iitc);
+                        if (iitc) {
+                            addIitc();
+                        }
                         setTimeout(function () {
                             announce('Will start screenshooting in ' + v/1000 + ' seconds...');
-                            if ((minlevel>1)|(maxlevel<8)){
+                            if ((minlevel > 1)||(maxlevel < 8)){
                                 setMinMax(minlevel, maxlevel, iitc);
                             } else if (!iitc) {
                                 page.evaluate(function () {
@@ -564,6 +575,8 @@ page.open('https://www.ingress.com/intel', function (status) {
                             }
                             hideDebris(iitc);
                             prepare(iitc, width, height);
+                            announce('The first screenshot may not contain all portals, it is intended for you to check framing.');
+                            main();
                             setInterval(main, v);
                         }, loginTimeout);
                     });
